@@ -11,6 +11,8 @@ export function idbPromise(storeName, method, object) {
     // open connection to the database `shop-shop` with the version of 1
     const request = window.indexedDB.open(`shop-again`, 1);
 
+    // create variables to hold database, transaction and store
+    let db, tx, store;
     // create variables to hold the reference to the database, transaction (tx), and object store
     request.onupgradeneeded = function(e) {
       const db = request.result;

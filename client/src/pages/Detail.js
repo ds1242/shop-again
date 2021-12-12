@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { useStoreContext } from "../utils/GlobalState";
 import { QUERY_PRODUCTS } from '../utils/queries';
+import { idbPromise } from "../utils/helpers";
 import spinner from '../assets/spinner.gif';
 import {
   REMOVE_FROM_CART,
@@ -23,16 +24,32 @@ function Detail() {
   const { products, cart } = state;  
 
   useEffect(() => {
+    // already in global store
     if (products.length) {
-      setCurrentProduct(products.find((product) => product._id === id));
-    } else if (data) {
+      setCurrentProduct(products.find(product => product._id === id));
+    } 
+    // retrieved from server
+    else if (data) {
       dispatch({
         type: UPDATE_PRODUCTS,
         products: data.products
       });
+  
+      data.products.forEach((product) => {
+        idbPromise('products', 'put', product);
+      });
     }
-  }, [products, data, dispatch, id]);
-
+    // get cache from idb
+    else if (!loading) {
+      idbPromise('products', 'get').then((indexedProducts) => {
+        dispatch({
+          type: UPDATE_PRODUCTS,
+          products: indexedProducts
+        });
+      });
+    }
+  }, [products, data, loading, dispatch, id]);
+  
   const addToCart = () => {
     const itemInCart = cart.find((cartItem) => cartItem._id === id);
   
