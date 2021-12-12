@@ -1,16 +1,18 @@
 import React from 'react';
 import { useStoreContext } from '../../utils/GlobalState';
-import { REMOVE_FROM_CART, UPDATE_CART_QUANTITY } from '../../utils/actions'
+import { REMOVE_FROM_CART, UPDATE_CART_QUANTITY } from '../../utils/actions';
+import { idbPromise } from "../../utils/helpers";
 
 const CartItem = ({ item }) => {
     const [, dispatch] = useStoreContext();
 
     const removeFromCart = item => {
         dispatch({
-            type: REMOVE_FROM_CART,
-            _id: item._id
+          type: REMOVE_FROM_CART,
+          _id: item._id
         });
-    };
+        idbPromise('cart', 'delete', { ...item });
+      };
 
     const onChange =(e) => {
         const value = e.target.value;
@@ -26,6 +28,7 @@ const CartItem = ({ item }) => {
                 _id: item._id,
                 purchaseQuantity: parseInt(value)
             });
+            idbPromise('cart', 'put', { ...item, purchaseQuantity: parseInt(value) });
         }
     };
 

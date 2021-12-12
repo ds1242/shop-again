@@ -2,7 +2,8 @@ import React from "react";
 import { useStoreContext } from '../../utils/GlobalState';
 import { ADD_TO_CART, UPDATE_CART_QUANTITY } from '../../utils/actions';
 import { Link } from "react-router-dom";
-import { pluralize } from "../../utils/helpers"
+import { pluralize } from "../../utils/helpers";
+import { idbPromise } from "../../utils/helpers";
 
 function ProductItem(item) {
   const {
@@ -17,21 +18,23 @@ function ProductItem(item) {
   const { cart } = state;
 
   const addToCart = () => {
-    // find the cart itme with the matching id
-    const itemIncart = cart.find((cartItem) => cartItem._id === _id);
-
-    // if there was a match, call UPDATE with a new purchase quantity
-    if(itemIncart) {
+    const itemInCart = cart.find((cartItem) => cartItem._id === _id)
+    if (itemInCart) {
       dispatch({
         type: UPDATE_CART_QUANTITY,
         _id: _id,
-        purchaseQuantity: parseInt(itemIncart.purchaseQuantity) + 1
+        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
+      });
+      idbPromise('cart', 'put', {
+        ...itemInCart,
+        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
       });
     } else {
       dispatch({
         type: ADD_TO_CART,
-        product: {...item, purchaseQuantity: 1}
+        product: { ...item, purchaseQuantity: 1 }
       });
+      idbPromise('cart', 'put', { ...item, purchaseQuantity: 1 });
     }
   };
 
