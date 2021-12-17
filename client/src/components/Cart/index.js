@@ -47,7 +47,7 @@ const Cart = () => {
           productIds.push(item._id);
         }
       });
-
+      // checkout state update 
       getCheckout({
         variables: { products: productIds }
       });
